@@ -25,15 +25,9 @@
 - **`README.md`**: corregidos hechos — ejemplo `const` → `var` (coincide con `data/names.js`) y créditos apuntan a la cabecera de `data/names.js` en vez de repetir la fuente.
 - **`.opencode/commands/feature.md`**: referencia rota `MEMORY.md` → `MEMORIES.md`.
 
-### v0.4 - Correcciones y mejoras visuales (2026-11-04)
-- **Fase 2**: lote siempre de 3 nombres (reset de `screened` si quedan < 3 para no mostrar 1 o 2 solos).
-- **Fase 3**: eliminado botón "Siguiente Partido" y botón "Ver campeón"; avance automático al elegir ganador en cada partido y ronda.
-- **Bienvenida**: mensaje de proceso guardado incluye la fase actual (ej. "Fase 2 · Concurso").
-- **Colores distintivos**: borde del header, botón principal, tarjetas seleccionadas y título cambian según fase (`phase-1/2/3`). Label VS cambia por ronda (`round-0` a `round-4`) con matiz distinto (azul, verde, naranja, rojo, púrpura).
-- **Layout**: 2 columnas paralelas (sidebar + main) con CSS Grid; misma altura, mismo nivel de inicio bajo el header.
-- **Diseño visual**: paleta cálida sin clichés de bebé; tipografía serif para el nombre del campeón; botones género en azulado/rosáceo.
-- **Información del desarrollador**: botón "i" en el header + dialog con desarrollador, versión, fecha y advertencia de errores.
-- **Sidebar**: z-index corregido (60) para que no quede bajo el overlay con blur en móvil.
+### v0.8 - TOP 8 con colores en campeón (2026-11-04)
+- **app.js**: `renderChampion()` muestra el TOP 8 sin números de puesto. Líneas con fondo de color: ganador (verde `--success`), subcampeón (rosa `--brand`), semifinales (azul `#0066cc`), cuartos (gris `--muted`). El array `top8` se llena por orden de eliminación y se invierte para mostrar de mejor a peor.
+- **styles.css**: clases `.top8__item--winner`, `.top8__item--runner-up`, `.top8__item--semi`, `.top8__item--quarter` con fondos de color y texto blanco.
 
 ### v0.1 - Inicialización (2025-10-25)
 > Resumen histórico del estado acordado en esa fecha; **para las normas vigentes consulta `AGENTS.md`** (si algo cambió después, manda AGENTS.md).

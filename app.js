@@ -101,6 +101,13 @@
   // Selección tentativa de la pantalla actual (no se persiste hasta "Continuar")
   let tentative = { eliminated: new Set(), selected: null };
 
+  // Selección tentativa en Fase 3 (ganador y perdedor)
+  let f3SelectedWinner = null;
+  let f3SelectedLoser = null;
+
+  // Fase previa para detectar cambios de fase (solo en memoria, no persiste)
+  let previousPhase = null;
+
   // Cuando el usuario pide "Volver al menú" se guarda phaseState y se vuelve a
   // la pantalla de inicio sin borrar el progreso (se ofrece "Reanudar").
   let forceWelcome = false;
@@ -135,6 +142,8 @@
   const $btnConfirmReset = $('btnConfirmReset');
   const $dlgInfo = $('dlgInfo');
   const $btnCloseInfo = $('btnCloseInfo');
+  const $dlgPhaseChange = $('dlgPhaseChange');
+  const $btnPhaseChangeOk = $('btnPhaseChangeOk');
 
   const $choiceBoy = $('choiceBoy');
   const $choiceGirl = $('choiceGirl');
@@ -252,6 +261,7 @@
     state.gender = gender;
     state.names = shuffle(source).slice(); // copia del array fuente
     state.phaseState = {};
+    previousPhase = null;
     persist();
     render();
   }
@@ -442,7 +452,8 @@
       bracket: bracket,
       round: 0,
       matchIndex: 0,
-      winners: []
+      winners: [],
+      top8: []
     };
   }
 
@@ -483,11 +494,20 @@
       card.setAttribute('aria-pressed', 'false');
       card.dataset.name = name;
       card.innerHTML = '<span class="phase-card__name">' + escapeHtml(name) + '</span>';
-      card.addEventListener('click', () => selectF3Winner(name));
+
+      // Aplicar resaltado si esta tarjeta está seleccionada
+      if (name === f3SelectedWinner) {
+        card.classList.add('phase-card--winner');
+        card.setAttribute('aria-pressed', 'true');
+      } else if (name === f3SelectedLoser) {
+        card.classList.add('phase-card--loser');
+      }
+
+      card.addEventListener('click', () => selectF3PhaseCard(name, a, b));
       card.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          selectF3Winner(name);
+          selectF3PhaseCard(name, a, b);
         }
       });
       vs.appendChild(card);
@@ -500,18 +520,48 @@
 
     $phaseContent.appendChild(vs);
 
-    // Botón contextual
-    // El avance en Fase 3 es automático al elegir ganador (selectF3Winner),
-    // por lo que no se muestra botón intermedio ni de ronda.
-    $btnPhaseAction.hidden = true;
-    $btnPhaseAction.disabled = true;
-    $btnPhaseAction.onclick = null;
+    // Botón contextual: solo visible si hay selección
+    const isLastMatch = ps.matchIndex === matchesTotal - 1;
+
+    if (isLastMatch && isFinalRound) {
+      $btnPhaseAction.textContent = 'Ver campeón';
+      $btnPhaseAction.hidden = f3SelectedWinner === null;
+      $btnPhaseAction.disabled = f3SelectedWinner === null;
+      $btnPhaseAction.onclick = advancePhase3;
+    } else if (isLastMatch) {
+      $btnPhaseAction.textContent = 'Ver siguiente ronda';
+      $btnPhaseAction.hidden = f3SelectedWinner === null;
+      $btnPhaseAction.disabled = f3SelectedWinner === null;
+      $btnPhaseAction.onclick = advancePhase3;
+    } else {
+      $btnPhaseAction.textContent = 'Siguiente partido';
+      $btnPhaseAction.hidden = f3SelectedWinner === null;
+      $btnPhaseAction.disabled = f3SelectedWinner === null;
+      $btnPhaseAction.onclick = advancePhase3;
+    }
   }
 
-  function selectF3Winner(winner) {
+  function selectF3PhaseCard(name, a, b) {
+    // Toggle: si ya está seleccionado este nombre, deseleccionar
+    if (f3SelectedWinner === name) {
+      f3SelectedWinner = null;
+      f3SelectedLoser = null;
+    } else {
+      f3SelectedWinner = name;
+      f3SelectedLoser = name === a ? b : a;
+    }
+    renderPhase3();
+  }
+
+  function selectF3Winner(winner, loser) {
     const ps = state.phaseState;
     ps.winners.push(winner);
     ps.matchIndex++;
+
+    // Capturar perdedor para TOP 8 a partir de cuartos (round >= 2)
+    if (ps.round >= 2) {
+      ps.top8.push(loser);
+    }
 
     const matchesTotal = CONFIG.f3MatchesPerRound[ps.round];
 
@@ -536,17 +586,8 @@
   }
 
   function advancePhase3() {
-    const ps = state.phaseState;
-    const matchesTotal = CONFIG.f3MatchesPerRound[ps.round];
-    const isLastMatch = ps.matchIndex === matchesTotal - 1;
-    const isFinal = ps.round === CONFIG.f3Rounds.length - 1;
-
-    if (isLastMatch && isFinal) {
-      render(); // pantalla de campeón
-    } else if (isLastMatch) {
-      renderPhase3(); // siguiente ronda (ya preparada por selectF3Winner)
-    }
-    // Partido intermedio: no hacer nada, avance automático al elegir ganador
+    if (f3SelectedWinner === null) return;
+    selectF3Winner(f3SelectedWinner, f3SelectedLoser);
   }
 
   /* ------------------------------------------------------------------ */
@@ -556,6 +597,48 @@
   function renderChampion() {
     $('championName').textContent = state.names[0];
     spawnConfetti();
+
+    // Renderizar TOP 8 con colores por clasificación
+    const ps = state.phaseState;
+    const top8List = $('top8List');
+    top8List.innerHTML = '';
+
+    // Campeón
+    const championItem = document.createElement('li');
+    championItem.className = 'top8__item top8__item--winner';
+    championItem.textContent = state.names[0];
+    top8List.appendChild(championItem);
+
+    // Los 7 perdedores en orden inverso (mejor a peor)
+    const reversed = ps.top8.slice().reverse();
+
+    // Subcampeón (perdedor de la final)
+    if (reversed[0]) {
+      const item = document.createElement('li');
+      item.className = 'top8__item top8__item--runner-up';
+      item.textContent = reversed[0];
+      top8List.appendChild(item);
+    }
+
+    // Semifinalistas (2 nombres, mismo color)
+    [reversed[1], reversed[2]].forEach((name) => {
+      if (name) {
+        const item = document.createElement('li');
+        item.className = 'top8__item top8__item--semi';
+        item.textContent = name;
+        top8List.appendChild(item);
+      }
+    });
+
+    // Cuartos de final (4 nombres, mismo color)
+    [reversed[3], reversed[4], reversed[5], reversed[6]].forEach((name) => {
+      if (name) {
+        const item = document.createElement('li');
+        item.className = 'top8__item top8__item--quarter';
+        item.textContent = name;
+        top8List.appendChild(item);
+      }
+    });
   }
 
   function spawnConfetti() {
@@ -598,6 +681,20 @@
     screens.welcome.hidden = !showWelcome;
     screens.champion.hidden = !showChampion;
     screens.phase.hidden = !(showWelcome === false && showChampion === false);
+
+    // Detección de cambio de fase (1→2, 2→3) y entrada inicial a cualquier fase
+    if (!showWelcome && !showChampion) {
+      const phase = state.phase;
+      if (previousPhase === null) {
+        // Primera entrada a una fase: mostrar dialog informativo
+        showPhaseChangeDialog(null, phase);
+        return;
+      } else if (phase !== previousPhase) {
+        // Cambio de fase: mostrar dialog informativo y detener el render
+        showPhaseChangeDialog(previousPhase, phase);
+        return;
+      }
+    }
 
     if (showWelcome) {
       renderWelcome();
@@ -642,7 +739,26 @@
     Store.reset();
     state = { gender: null, names: [], phase: 1, phaseState: {} };
     tentative = { eliminated: new Set(), selected: null };
+    previousPhase = null;
     render();
+  }
+
+  /**
+   * Muestra un dialog informativo al cambiar de fase.
+   * Detiene el render hasta que el usuario pulse "Entendido".
+   * @param {number} from - Fase anterior
+   * @param {number} to - Fase nueva
+   */
+  function showPhaseChangeDialog(from, to) {
+    const titles = { 1: 'Fase 1 · Eliminación', 2: 'Fase 2 · Concurso', 3: 'Fase 3 · Eliminatoria' };
+    const instructions = {
+      1: 'Revisa los 6 nombres que aparecen. <span class="phase-change--highlight--eliminate">Toca los que NO te gustan para eliminarlos</span>. Puedes eliminar tantos como quieras. Cuando termines, pulsa "Continuar".',
+      2: 'Se muestran 3 nombres. Debes <span class="phase-change--highlight--eliminate">eliminar</span> obligatoriamente 1 de los 3. Elige el que menos te convenza. Repite hasta quedar 32 nombres.',
+      3: 'Torneo directo: elige el <span class="phase-change--highlight--winner">ganador</span> que pase a la siguiente ronda. Rondas: Dieciseisavos → Octavos → Cuartos → Semifinales → Final.'
+    };
+    $dlgPhaseChange.querySelector('#phaseChangeTitle').textContent = titles[to] || 'Nueva fase';
+    $dlgPhaseChange.querySelector('#phaseChangeInstruction').innerHTML = instructions[to] || '';
+    $dlgPhaseChange.showModal();
   }
 
   /* ------------------------------------------------------------------ */
@@ -676,6 +792,12 @@
 
     $btnInfo.addEventListener('click', () => { $dlgInfo.showModal(); });
     $btnCloseInfo.addEventListener('click', () => { $dlgInfo.close(); });
+
+    $btnPhaseChangeOk.addEventListener('click', () => {
+      $dlgPhaseChange.close();
+      previousPhase = state.phase; // actualizar para no volver a mostrar el dialog
+      render(); // re-renderizar la nueva fase
+    });
 
     // Bienvenida
     $choiceBoy.addEventListener('click', () => startWithGender('boy'));

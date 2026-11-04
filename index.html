@@ -69,6 +69,10 @@
       <h2>¡Has elegido el nombre perfecto! 🎉</h2>
       <div class="champion">
         <div class="champion__name" id="championName"></div>
+        <div id="top8" class="top8">
+          <h3 class="top8__title">TOP 8</h3>
+          <ol class="top8__list" id="top8List"></ol>
+        </div>
         <div class="confetti" id="confetti"></div>
       </div>
       <button class="btn-primary" id="btnResetChampion" type="button">Reiniciar proceso</button>
@@ -94,6 +98,16 @@
         <p class="warning">⚠️ Esta aplicación podría contener errores. Úsala bajo tu propia responsabilidad.</p>
         <menu class="dialog__actions">
           <button class="btn-primary" id="btnCloseInfo">Aceptar</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <dialog id="dlgPhaseChange" class="dialog dialog--phase-change">
+      <form method="dialog">
+        <h3 id="phaseChangeTitle">Nueva fase</h3>
+        <p id="phaseChangeInstruction"></p>
+        <menu class="dialog__actions">
+          <button class="btn-primary" id="btnPhaseChangeOk">Entendido</button>
         </menu>
       </form>
     </dialog>

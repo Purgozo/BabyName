@@ -16,6 +16,7 @@
   --surface: #ffffff;
   --brand: #b54a6c;
   --brand-dark: #8d3a54;
+  --success: #15803d;
   --muted: #6e656a;
   --line: #e7e2dd;
   --line-hover: #d9d1c9;
@@ -211,7 +212,7 @@ body.phase-3 .btn-primary:not(:disabled):hover { background: var(--brand-dark); 
 
 /* Tarjetas seleccionadas según fase */
 body.phase-1 .phase-card--selected { border-color: var(--phase-1-color); box-shadow: 0 0 0 4px rgb(232 163 61 / 0.12); }
-body.phase-2 .phase-card--selected { border-color: var(--phase-2-color); box-shadow: 0 0 0 4px rgb(107 140 66 / 0.12); }
+body.phase-2 .phase-card--selected { border-color: var(--brand-dark); background: #fdecea; color: var(--brand-dark); text-decoration: line-through; box-shadow: 0 0 0 4px rgb(212 106 138 / 0.15); }
 body.phase-3 .phase-card--selected { border-color: var(--phase-3-color); box-shadow: 0 0 0 4px rgb(181 74 108 / 0.12); }
 
 /* Label VS según ronda de Fase 3 */
@@ -473,7 +474,7 @@ body.sidebar-open .sidebar__overlay {
 
 .phase-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   width: 100%;
   padding-top: 0.5rem;
 }
@@ -536,9 +537,11 @@ body.sidebar-open .sidebar__overlay {
 .phase-card:hover { border-color: var(--brand); }
 
 .phase-card--selected {
-  border-color: var(--brand);
-  background: #fdf2f4;
-  box-shadow: 0 0 0 4px rgb(181 74 108 / 0.12);
+  border-color: var(--brand-dark);
+  background: #fdecea;
+  color: var(--brand-dark);
+  text-decoration: line-through;
+  box-shadow: 0 0 0 4px rgb(212 106 138 / 0.15);
 }
 
 .phase-card--eliminated {
@@ -578,6 +581,20 @@ body.sidebar-open .sidebar__overlay {
 
 .phase-card--f3:hover { border-color: var(--brand); background: #fdf2f4; }
 
+/* Resaltado en Fase 3: ganador y perdedor seleccionados */
+.phase-card--f3.phase-card--winner {
+  background: #dcfce7;
+  color: var(--success);
+  border-color: var(--success);
+}
+
+.phase-card--f3.phase-card--loser {
+  background: #fdecea;
+  color: var(--brand-dark);
+  text-decoration: line-through;
+  opacity: 0.85;
+}
+
 /* ==========================================================================
    Pantalla campeón
    ========================================================================== */
@@ -612,6 +629,61 @@ body.sidebar-open .sidebar__overlay {
   margin-bottom: 0.5rem;
   letter-spacing: 0.02em;
 }
+
+/* TOP 8 - discreto, debajo del campeón */
+.top8 {
+  width: 100%;
+  max-width: 22rem;
+  margin: 0 auto 0.5rem;
+  text-align: left;
+}
+
+.top8__title {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin: 0 0 0.5rem;
+  padding-left: 0.5rem;
+}
+
+.top8__list {
+  margin: 0;
+  padding: 0 0 0 1.25rem;
+  list-style: none;
+}
+
+.top8__item {
+  font-size: 0.875rem;
+  color: var(--muted);
+  margin: 0.15rem 0;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  transition: background var(--transition);
+}
+
+.top8__item--winner {
+  background: #dcfce7;
+  color: var(--success);
+  font-weight: 700;
+}
+
+.top8__item--runner-up {
+  background: #fdecea;
+  color: var(--brand-dark);
+}
+
+.top8__item--semi {
+  background: #dbeafe;
+  color: var(--ink);
+}
+
+.top8__item--quarter {
+  background: #f3f4f6;
+  color: var(--muted);
+}
+
+.top8__item:hover { background: #e7e2dd; }
 
 .confetti {
   position: absolute;
@@ -710,6 +782,17 @@ dialog::backdrop {
 
 .dialog--info .warning::before {
   content: '⚠️ ';
+}
+
+/* Destacados en diálogos de cambio de fase */
+.phase-change--highlight--eliminate {
+  font-weight: 700;
+  color: var(--brand-dark);
+}
+
+.phase-change--highlight--winner {
+  font-weight: 700;
+  color: var(--success);
 }
 
 /* ==========================================================================
