@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BabyName - Elige el nombre de tu bebé</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <noscript class="noscript">
+    <p>BabyName necesita JavaScript. Actívalo en tu navegador para continuar.</p>
+  </noscript>
+
+  <header class="app-header">
+    <div class="header__left">
+      <button class="hamburger" id="btnHamburger" type="button" aria-expanded="false" aria-controls="sidebar">☰</button>
+      <button class="btn-info" id="btnInfo" type="button" aria-label="Información" title="Información">i</button>
+    </div>
+    <h1 class="app-title">BabyName</h1>
+    <div class="app-header__right">
+      <span id="counter" class="counter" aria-live="polite">Nombres restantes: <span id="counterValue">0</span></span>
+    </div>
+  </header>
+
+  <aside class="sidebar" id="sidebar">
+    <menu class="sidebar__menu">
+      <h2 class="sidebar__title">Fases</h2>
+      <button class="sidebar__btn" id="btnPhase1" data-phase="1" type="button">1 · Eliminación</button>
+      <button class="sidebar__btn" id="btnPhase2" data-phase="2" type="button">2 · Concurso</button>
+      <button class="sidebar__btn" id="btnPhase3" data-phase="3" type="button">3 · Eliminatoria</button>
+      <button class="sidebar__btn sidebar__btn--reset" id="btnReset" type="button">Reiniciar todo</button>
+    </menu>
+  </aside>
+  <div class="sidebar__overlay" id="sidebarOverlay"></div>
+
+  <main class="app-main" id="appMain">
+    <!-- Pantalla de bienvenida / elección de género -->
+    <section class="screen screen--welcome" id="screenWelcome" aria-hidden="false">
+      <h2>Bienvenidos a BabyName</h2>
+      <p>En esta aplicación, podréis elegir nombre para vuestro bebé en 3 fases. </p>
+      <p>Cada una de ellas tiene una funcionalidad para ir descartando y eligiendo nombres.</p>
+      <p>Para empezar, elige el género.</p>
+      <div class="choices" role="radiogroup" aria-label="Género">
+        <button class="choice choice--boy" id="choiceBoy" type="button" role="radio" aria-checked="false">Niño</button>
+        <button class="choice choice--girl" id="choiceGirl" type="button" role="radio" aria-checked="false">Niña</button>
+      </div>
+      <div id="welcomeResume" class="resume" hidden>
+        <p id="resumeMessage">Hay un proceso guardado.</p>
+        <button class="btn-primary" id="btnResume" type="button">Reanudar proceso</button>
+        <button class="btn-outline" id="btnNew" type="button">Empezar de nuevo</button>
+      </div>
+    </section>
+
+    <!-- Pantalla de fase activa (1, 2 o 3) -->
+    <section class="screen screen--phase" id="screenPhase" hidden aria-hidden="true">
+      <div class="phase-header">
+        <h2 id="phaseTitle">Fase</h2>
+        <p id="phaseInstruction" class="phase-instruction"></p>
+        <button class="btn-back" id="btnBackMenu" type="button">Volver al menú</button>
+      </div>
+      <div id="phaseContent" class="phase-content"></div>
+      <div class="phase-actions">
+        <button class="btn-primary" id="btnPhaseAction" type="button">Continuar</button>
+      </div>
+    </section>
+
+    <!-- Pantalla de campeón -->
+    <section class="screen screen--champion" id="screenChampion" hidden aria-hidden="true">
+      <h2>¡Has elegido el nombre perfecto! 🎉</h2>
+      <div class="champion">
+        <div class="champion__name" id="championName"></div>
+        <div class="confetti" id="confetti"></div>
+      </div>
+      <button class="btn-primary" id="btnResetChampion" type="button">Reiniciar proceso</button>
+    </section>
+
+    <dialog id="dlgReset" class="dialog">
+      <form method="dialog">
+        <h3>¿Reiniciar todo?</h3>
+        <p>Se borrará el progreso actual y volverás a la pantalla de inicio.</p>
+        <menu class="dialog__actions">
+          <button class="btn-outline" type="button" id="btnCancelReset">Cancelar</button>
+          <button class="btn-danger" id="btnConfirmReset">Reiniciar</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <dialog id="dlgInfo" class="dialog dialog--info">
+      <form method="dialog">
+        <h3>Información</h3>
+        <p><strong>Desarrollador:</strong> Álvaro Gómez</p>
+        <p><strong>Versión:</strong> v0.4</p>
+        <p><strong>Última versión estable:</strong> 04/11/2026</p>
+        <p class="warning">⚠️ Esta aplicación podría contener errores. Úsala bajo tu propia responsabilidad.</p>
+        <menu class="dialog__actions">
+          <button class="btn-primary" id="btnCloseInfo">Aceptar</button>
+        </menu>
+      </form>
+    </dialog>
+  </main>
+
+  <script src="data/names.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
